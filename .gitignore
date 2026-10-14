@@ -1,0 +1,8 @@
+cat > .gitignore <<'EOF'
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editors
+.vscode/
+EOF
