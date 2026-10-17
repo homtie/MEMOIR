@@ -194,5 +194,67 @@ export async function deleteMemory(id) {
   return true;
 }
 
+export function searchMemories(memories, query) {
+  // Defensive: ensure we work with an array (tests always provide one)
+  if (!Array.isArray(memories)) {
+    throw new TypeError('memories must be an array');
+  }
+
+  // Normalise query: trim and split on whitespace, discard empty parts
+  const words = String(query || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.toLowerCase());
+
+  // Empty query => return a shallow copy preserving original order & references
+  if (words.length === 0) {
+    return [...memories];
+  }
+
+  const searchableFields = [
+    'content',
+    'title',
+    'url',
+    'tags',
+    'category',
+    'type',
+    'source',
+  ];
+
+  // Helper to test if a word matches a memory in any searchable field
+  const memoryMatches = (memory) => {
+    // Every query word must match at least one searchable field
+    return words.every((word) => {
+      return searchableFields.some((field) => {
+        const value = memory[field];
+
+        if (value == null) return false;
+
+        if (Array.isArray(value)) {
+          // Allow substring matching within each tag
+          return value.some(
+            (tag) =>
+              typeof tag === 'string' && tag.toLowerCase().includes(word)
+          );
+        }
+
+        if (typeof value !== 'string') return false;
+
+        // Case-insensitive substring matching
+        return value.toLowerCase().includes(word);
+      });
+    });
+  };
+  // Preserve order and avoid mutation by building a new array
+  const result = [];
+  for (const mem of memories) {
+    if (memoryMatches(mem)) {
+      result.push(mem);
+    }
+  }
+  return result;
+}
+
 // Export for testing
 export { CURRENT_SCHEMA_VERSION, applyDefaults };
