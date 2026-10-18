@@ -6,14 +6,22 @@
  * Uses memoryService instead of direct chrome.storage.local access.
  */
 
-import { getAllMemories } from "./services/memoryService.js";
+import { getAllMemories, searchMemories } from "./services/memoryService.js";
 import { validateUrl } from "./utils/validation.js";
 
 const saveButton = document.getElementById("saveButton");
 const memoryList = document.getElementById("memoryList");
+const memorySearch = document.getElementById("memorySearch");
+let allMemories = null;
 
 saveButton.addEventListener("click", () => {
   alert("MEMOIR is alive");
+});
+
+memorySearch.addEventListener("input", () => {
+  if (allMemories !== null) {
+    renderMemories(searchMemories(allMemories, memorySearch.value));
+  }
 });
 
 /**
@@ -24,55 +32,58 @@ saveButton.addEventListener("click", () => {
  * This ensures that stored content like <img src=x onerror=alert(1)>
  * renders as harmless text.
  */
+function renderMemories(memories) {
+  memoryList.textContent = "";
+
+  if (allMemories.length === 0 || memories.length === 0) {
+    const emptyMsg = document.createElement("p");
+    emptyMsg.textContent = allMemories.length === 0
+      ? "No memories yet."
+      : "No matching memories.";
+    memoryList.appendChild(emptyMsg);
+    return;
+  }
+
+  for (const memory of memories) {
+    const item = document.createElement("div");
+
+    // Content — user-controlled, must use textContent
+    const contentEl = document.createElement("p");
+    contentEl.textContent = memory.content || "";
+    item.appendChild(contentEl);
+
+    // Title — user-controlled, must use textContent
+    const titleEl = document.createElement("small");
+    titleEl.textContent = memory.title || "";
+    item.appendChild(titleEl);
+
+    // Source link — only create a clickable link if URL is valid and safe
+    if (memory.url) {
+      const urlCheck = validateUrl(memory.url);
+      if (urlCheck.valid && memory.url.length > 0) {
+        const linkEl = document.createElement("a");
+        linkEl.href = memory.url;
+        linkEl.textContent = memory.url;
+        linkEl.target = "_blank";
+        linkEl.rel = "noopener noreferrer";
+
+        const linkWrapper = document.createElement("div");
+        linkWrapper.appendChild(linkEl);
+        item.appendChild(linkWrapper);
+      }
+    }
+
+    const separator = document.createElement("hr");
+    item.appendChild(separator);
+
+    memoryList.appendChild(item);
+  }
+}
+
 async function loadMemories() {
   try {
-    const memories = await getAllMemories();
-
-    if (memories.length === 0) {
-      // Static HTML with no user data — safe to use textContent
-      memoryList.textContent = "";
-      const emptyMsg = document.createElement("p");
-      emptyMsg.textContent = "No memories yet.";
-      memoryList.appendChild(emptyMsg);
-      return;
-    }
-
-    memoryList.textContent = "";
-
-    for (const memory of memories) {
-      const item = document.createElement("div");
-
-      // Content — user-controlled, must use textContent
-      const contentEl = document.createElement("p");
-      contentEl.textContent = memory.content || "";
-      item.appendChild(contentEl);
-
-      // Title — user-controlled, must use textContent
-      const titleEl = document.createElement("small");
-      titleEl.textContent = memory.title || "";
-      item.appendChild(titleEl);
-
-      // Source link — only create a clickable link if URL is valid and safe
-      if (memory.url) {
-        const urlCheck = validateUrl(memory.url);
-        if (urlCheck.valid && memory.url.length > 0) {
-          const linkEl = document.createElement("a");
-          linkEl.href = memory.url;
-          linkEl.textContent = memory.url;
-          linkEl.target = "_blank";
-          linkEl.rel = "noopener noreferrer";
-
-          const linkWrapper = document.createElement("div");
-          linkWrapper.appendChild(linkEl);
-          item.appendChild(linkWrapper);
-        }
-      }
-
-      const separator = document.createElement("hr");
-      item.appendChild(separator);
-
-      memoryList.appendChild(item);
-    }
+    allMemories = await getAllMemories();
+    renderMemories(searchMemories(allMemories, memorySearch.value));
   } catch (error) {
     console.error("MEMOIR: Failed to load memories:", error.message);
 
