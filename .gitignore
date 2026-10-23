@@ -4,3 +4,11 @@
 
 # Editors
 .vscode/
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+#environment var
+.env
