@@ -1,26 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MEMOIR</title>
+  <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
-  <h1>MEMOIR</h1>
+  <div class="popup-container">
+    <!-- A. Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-glyph" aria-hidden="true">✦</span>
+        <h1 class="brand-title">MEMOIR</h1>
+      </div>
+      <p class="brand-tagline">Your knowledge, within reach.</p>
+    </header>
 
-  <p>Your personal knowledge layer.</p>
+    <!-- B. Capture Section -->
+    <section class="capture-section" aria-labelledby="capture-heading">
+      <h2 id="capture-heading" class="section-title">Save this moment</h2>
+      <p class="section-desc">Save a page or selected text while browsing. Highlight text on any webpage and right-click to save to your personal knowledge base.</p>
+      <div class="capture-actions">
+        <button id="saveButton" type="button" class="btn-primary">
+          <span class="btn-icon" aria-hidden="true">✦</span>
+          <span>Save Something</span>
+        </button>
+      </div>
+      <div id="statusMessage" class="status-banner visually-hidden" role="status" aria-live="polite"></div>
+      <div class="capture-hint">
+        <span class="hint-dot" aria-hidden="true"></span>
+        <span>Selection capture active via browser context menu</span>
+      </div>
+    </section>
 
-  <button id="saveButton">Save Something</button>
+    <!-- C. Search -->
+    <section class="search-section" aria-label="Search memories">
+      <label for="memorySearch" class="visually-hidden">Search memories</label>
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input id="memorySearch" type="search" placeholder="Find something you saved…" autocomplete="off" spellcheck="false">
+      </div>
+    </section>
 
-  <hr>
-
-  <h2>Saved Memories</h2>
-
-  <label for="memorySearch">Search memories</label>
-  <input id="memorySearch" type="search" placeholder="Search memories...">
-
-  <div id="memoryList">
-    <p>No memories yet.</p>
+    <!-- Saved Memories List -->
+    <section class="memories-section" aria-labelledby="memories-heading">
+      <h2 id="memories-heading" class="section-heading">Saved Memories</h2>
+      <div id="memoryList" class="memory-list" role="region" aria-live="polite">
+        <p>No memories yet.</p>
+      </div>
+    </section>
   </div>
 
   <script src="popup.js" type="module"></script>

@@ -5,7 +5,9 @@
   "description": "Capture and organize useful knowledge from anywhere.",
 
   "permissions": [
+    "activeTab",
     "contextMenus",
+    "scripting",
     "storage"
   ],
 

@@ -1,0 +1,546 @@
+/**
+ * MEMOIR — Visual Foundation & Popup Stylesheet
+ * Design Concept: "A living layer of knowledge."
+ */
+
+:root {
+  /* Core Color Palette Tokens */
+  --color-bg: #F7F2EA;              /* Warm ivory background */
+  --color-surface: #FFFFFF;         /* Clean surface card */
+  --color-surface-subtle: #F2ECE1;  /* Soft tinted surface */
+  --color-accent-rose: #D9B8C8;     /* Dusty rose accent */
+  --color-accent-sage: #B6C5B0;     /* Muted sage accent */
+  --color-accent-lavender: #D6C9E2; /* Soft lavender accent */
+  --color-ink: #453B43;             /* Primary ink (contrast ratio > 9:1) */
+  --color-ink-muted: #796A75;       /* Secondary text (contrast ratio > 4.5:1) */
+  --color-border: #E5DCD0;          /* Warm neutral border */
+  --color-border-subtle: #EFE7DC;   /* Restrained border */
+  --color-link: #415A44;            /* Accessible link/sage ink */
+
+  /* Typography */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Corner Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 3px rgba(69, 59, 67, 0.05), 0 1px 2px rgba(69, 59, 67, 0.03);
+  --shadow-card: 0 2px 6px rgba(69, 59, 67, 0.05);
+  --shadow-hover: 0 4px 10px rgba(69, 59, 67, 0.08);
+}
+
+/* Base & Layout */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-system);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  width: 380px;
+  min-height: 440px;
+  max-height: 580px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.popup-container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Section A: Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 2px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.brand-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  color: var(--color-ink);
+  background-color: var(--color-accent-lavender);
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+.brand-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+  line-height: 1.2;
+}
+
+.brand-tagline {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Section B: Capture Section */
+.capture-section {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.section-title {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+.section-desc {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+.capture-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-bg);
+  background-color: var(--color-ink);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+  background-color: #352C33;
+  border-color: #352C33;
+}
+
+.btn-primary:active {
+  transform: scale(0.99);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-accent-rose);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  pointer-events: none;
+}
+
+.btn-icon {
+  font-size: 11px;
+  color: var(--color-accent-rose);
+}
+
+/* Status feedback banner */
+.status-banner {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.status-banner--success {
+  background-color: rgba(182, 197, 176, 0.3);
+  border: 1px solid rgba(182, 197, 176, 0.7);
+  color: var(--color-ink);
+}
+
+.status-banner--notice {
+  background-color: rgba(214, 201, 226, 0.35);
+  border: 1px solid rgba(214, 201, 226, 0.75);
+  color: var(--color-ink);
+}
+
+.status-banner--error {
+  background-color: rgba(217, 184, 200, 0.35);
+  border: 1px solid rgba(217, 184, 200, 0.8);
+  color: var(--color-ink);
+}
+
+.capture-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+
+.hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent-sage);
+  flex-shrink: 0;
+}
+
+/* Section C: Search */
+.search-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-ink-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+#memorySearch {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#memorySearch::placeholder {
+  color: var(--color-ink-muted);
+  opacity: 0.85;
+}
+
+#memorySearch:hover {
+  border-color: #D2C4B5;
+}
+
+#memorySearch:focus {
+  outline: none;
+  border-color: var(--color-accent-rose);
+  box-shadow: 0 0 0 3px rgba(217, 184, 200, 0.35);
+}
+
+/* Clear button on webkit search inputs */
+#memorySearch::-webkit-search-cancel-button {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+/* Section D: Saved Memories */
+.memories-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+.memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Dynamic content generated by popup.js:
+ * 1. Empty message or error message: <p>No memories yet.</p>
+ * 2. Memory items: <div><p>...</p><small>...</small><div><a>...</a></div><hr></div>
+ */
+
+.memory-list > p {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-ink-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.memory-list > div {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent-sage);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.memory-list > div:hover {
+  border-color: var(--color-accent-rose);
+  border-left-color: var(--color-accent-sage);
+  box-shadow: var(--shadow-hover);
+}
+
+.memory-list > div > p {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.memory-list > div > small {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.memory-list > div > small:empty {
+  display: none;
+}
+
+/* Card footer & action controls */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.card-source {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.card-source > a,
+.memory-list > div > div > a {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 11px;
+  color: var(--color-link);
+  text-decoration: none;
+  background-color: rgba(182, 197, 176, 0.22);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(182, 197, 176, 0.45);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.card-source > a:hover,
+.memory-list > div > div > a:hover {
+  text-decoration: underline;
+  background-color: rgba(182, 197, 176, 0.35);
+  border-color: rgba(182, 197, 176, 0.7);
+}
+
+.card-source > a:focus-visible,
+.memory-list > div > div > a:focus-visible {
+  outline: 2px solid var(--color-accent-rose);
+  outline-offset: 1px;
+}
+
+.card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.btn-card-delete {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  line-height: 1.4;
+}
+
+.btn-card-delete:hover {
+  color: #8A3B4D;
+  border-color: var(--color-accent-rose);
+  background-color: rgba(217, 184, 200, 0.25);
+}
+
+.btn-card-delete:focus-visible {
+  outline: 2px solid var(--color-accent-rose);
+  outline-offset: 1px;
+}
+
+.delete-prompt {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A3B4D;
+  user-select: none;
+}
+
+.btn-confirm-delete {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background-color: #8A3B4D;
+  border: 1px solid #783141;
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  line-height: 1.4;
+}
+
+.btn-confirm-delete:hover {
+  background-color: #783141;
+}
+
+.btn-confirm-delete:focus-visible {
+  outline: 2px solid #8A3B4D;
+  outline-offset: 1px;
+}
+
+.btn-confirm-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel-delete {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  line-height: 1.4;
+}
+
+.btn-cancel-delete:hover {
+  background-color: #E8DFD3;
+  border-color: #D2C4B5;
+}
+
+.btn-cancel-delete:focus-visible {
+  outline: 2px solid var(--color-accent-rose);
+  outline-offset: 1px;
+}
+
+.btn-cancel-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.source-unavailable {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  font-style: italic;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-subtle);
+  border: 1px dashed var(--color-border);
+  user-select: none;
+}
+
+/* Hide raw hr element appended by popup.js inside the styled card */
+.memory-list > div > hr {
+  display: none;
+}

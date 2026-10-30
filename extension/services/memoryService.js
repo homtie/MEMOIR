@@ -32,7 +32,7 @@ function applyDefaults(memory) {
     type: memory.type ?? "capture",
     source: memory.source ?? memory.type ?? "capture",
     content: memory.content ?? "",
-    url: memory.url ?? "",
+    url: typeof memory.url === "string" ? memory.url.trim() : (memory.url ?? ""),
     title: memory.title ?? "",
     tags: Array.isArray(memory.tags) ? memory.tags : [],
     category: typeof memory.category === "string" ? memory.category : "",
@@ -57,10 +57,11 @@ function applyDefaults(memory) {
  * @throws {Error} If validation fails or storage write fails
  */
 export async function createMemory(input) {
-  // Trim content before validation — whitespace-only content will be rejected
+  // Trim content and url before validation — whitespace-only content will be rejected
   const trimmedInput = {
     ...input,
     content: typeof input.content === "string" ? input.content.trim() : input.content,
+    url: typeof input.url === "string" ? input.url.trim() : (input.url ?? ""),
   };
 
   const validation = validateMemoryInput(trimmedInput);
@@ -254,6 +255,83 @@ export function searchMemories(memories, query) {
     }
   }
   return result;
+}
+
+/**
+ * Normalize a URL for duplicate detection.
+ *
+ * Lowercases scheme and hostname, removes hash fragment,
+ * removes trailing slash from pathname (if length > 1),
+ * and standardizes default ports.
+ *
+ * @param {string} rawUrl - The raw URL string
+ * @returns {string} Normalized URL string
+ */
+export function normalizeUrl(rawUrl) {
+  if (typeof rawUrl !== "string") return "";
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return "";
+
+  try {
+    const parsed = new URL(trimmed);
+    parsed.protocol = parsed.protocol.toLowerCase();
+    parsed.hostname = parsed.hostname.toLowerCase();
+    parsed.hash = "";
+
+    if (parsed.pathname.length > 1 && parsed.pathname.endsWith("/")) {
+      parsed.pathname = parsed.pathname.slice(0, -1);
+    }
+
+    return parsed.toString();
+  } catch {
+    return trimmed;
+  }
+}
+
+/**
+ * Check whether a page-resource memory already exists for a given URL.
+ *
+ * Only matches memories where type === "page".
+ * Memories with type === "capture" (from context menu) are NOT considered page duplicates.
+ *
+ * @param {string} url - Target URL
+ * @param {Array<object>} memories - Existing memories array
+ * @returns {boolean} True if a page memory already exists for this normalized URL
+ */
+export function isDuplicatePage(url, memories) {
+  if (!url || !Array.isArray(memories)) return false;
+  const targetNorm = normalizeUrl(url);
+  if (!targetNorm) return false;
+
+  return memories.some(
+    (m) => m?.type === "page" && normalizeUrl(m?.url) === targetNorm
+  );
+}
+
+/**
+ * Save a webpage as a page resource memory.
+ * Checks for duplicates before creating.
+ *
+ * @param {object} input - Page save input
+ * @param {string} input.url - The page URL
+ * @param {string} [input.title] - The page title
+ * @param {string} input.content - Page excerpt or title
+ * @returns {Promise<{ duplicate: boolean, memory?: object }>}
+ */
+export async function savePageMemory({ url, title, content }) {
+  const existingMemories = await getAllMemories();
+  if (isDuplicatePage(url, existingMemories)) {
+    return { duplicate: true };
+  }
+
+  const memory = await createMemory({
+    type: "page",
+    content,
+    url,
+    title,
+  });
+
+  return { duplicate: false, memory };
 }
 
 // Export for testing
