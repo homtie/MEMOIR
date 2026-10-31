@@ -10,6 +10,12 @@ import { getAllMemories, searchMemories, createMemory, isDuplicatePage, deleteMe
 import { validateUrl } from "./utils/validation.js";
 
 const saveButton = typeof document !== "undefined" ? document.getElementById("saveButton") : null;
+const newNoteButton = typeof document !== "undefined" ? document.getElementById("newNoteButton") : null;
+const noteComposer = typeof document !== "undefined" ? document.getElementById("noteComposer") : null;
+const noteTitle = typeof document !== "undefined" ? document.getElementById("noteTitle") : null;
+const noteContent = typeof document !== "undefined" ? document.getElementById("noteContent") : null;
+const saveNoteButton = typeof document !== "undefined" ? document.getElementById("saveNoteButton") : null;
+const cancelNoteButton = typeof document !== "undefined" ? document.getElementById("cancelNoteButton") : null;
 const statusMessage = typeof document !== "undefined" ? document.getElementById("statusMessage") : null;
 const memoryList = typeof document !== "undefined" ? document.getElementById("memoryList") : null;
 const memorySearch = typeof document !== "undefined" ? document.getElementById("memorySearch") : null;
@@ -230,6 +236,221 @@ export async function handleSavePage({
 if (saveButton) {
   saveButton.addEventListener("click", () => {
     handleSavePage();
+  });
+}
+
+/**
+ * Open and reveal the manual note composer in the popup.
+ *
+ * @param {object} [deps={}] - Injectable DOM elements for unit testing
+ */
+export function openNoteComposer({
+  composerEl = noteComposer,
+  toggleBtn = newNoteButton,
+  titleInput = noteTitle,
+  contentInput = noteContent,
+} = {}) {
+  if (composerEl) {
+    if (typeof composerEl.classList?.remove === "function") {
+      composerEl.classList.remove("hidden");
+    } else if (typeof composerEl.className === "string") {
+      composerEl.className = composerEl.className.replace(/\bhidden\b/g, "").trim();
+    }
+  }
+  if (toggleBtn && typeof toggleBtn.setAttribute === "function") {
+    toggleBtn.setAttribute("aria-expanded", "true");
+  }
+  if (titleInput && typeof titleInput.focus === "function") {
+    titleInput.focus();
+  } else if (contentInput && typeof contentInput.focus === "function") {
+    contentInput.focus();
+  }
+}
+
+/**
+ * Close the manual note composer and clear its inputs.
+ *
+ * @param {object} [deps={}] - Injectable DOM elements for unit testing
+ * @param {boolean} [deps.restoreFocus=false] - Whether to return focus to the toggle button
+ */
+export function closeNoteComposer({
+  composerEl = noteComposer,
+  toggleBtn = newNoteButton,
+  titleInput = noteTitle,
+  contentInput = noteContent,
+  restoreFocus = false,
+} = {}) {
+  if (composerEl) {
+    if (typeof composerEl.classList?.add === "function") {
+      composerEl.classList.add("hidden");
+    } else if (typeof composerEl.className === "string" && !composerEl.className.includes("hidden")) {
+      composerEl.className = `${composerEl.className} hidden`.trim();
+    }
+  }
+  if (toggleBtn && typeof toggleBtn.setAttribute === "function") {
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+  if (titleInput) {
+    titleInput.value = "";
+  }
+  if (contentInput) {
+    contentInput.value = "";
+  }
+  if (restoreFocus && toggleBtn && typeof toggleBtn.focus === "function") {
+    toggleBtn.focus();
+  }
+}
+
+/**
+ * Toggle the manual note composer open or closed.
+ *
+ * @param {object} [deps={}] - Injectable DOM elements for unit testing
+ */
+export function toggleNoteComposer({
+  composerEl = noteComposer,
+  toggleBtn = newNoteButton,
+  titleInput = noteTitle,
+  contentInput = noteContent,
+} = {}) {
+  const isHidden = composerEl
+    ? (typeof composerEl.classList?.contains === "function"
+        ? composerEl.classList.contains("hidden")
+        : (composerEl.className || "").includes("hidden"))
+    : true;
+
+  if (isHidden) {
+    openNoteComposer({ composerEl, toggleBtn, titleInput, contentInput });
+  } else {
+    closeNoteComposer({ composerEl, toggleBtn, titleInput, contentInput, restoreFocus: true });
+  }
+}
+
+/**
+ * Handle saving a manual note memory.
+ *
+ * @param {object} [deps={}] - Injectable dependencies for unit testing
+ * @returns {Promise<object|null>} The created memory, or null on failure
+ */
+export async function handleSaveManualNote({
+  createMemoryFn = createMemory,
+  loadMemoriesFn = loadMemories,
+  composerEl = noteComposer,
+  toggleBtn = newNoteButton,
+  titleInput = noteTitle,
+  contentInput = noteContent,
+  saveBtn = saveNoteButton,
+  statusEl = statusMessage,
+  targetList = memoryList,
+  searchInput = memorySearch,
+  doc = (typeof document !== "undefined" ? document : null),
+  restoreFocus = true,
+} = {}) {
+  if (saveBtn) {
+    if (saveBtn.disabled) return null; // Prevent duplicate in-flight submissions
+    saveBtn.disabled = true;
+    if (typeof saveBtn.setAttribute === "function") {
+      saveBtn.setAttribute("aria-busy", "true");
+    }
+  }
+
+  const rawContent = contentInput ? contentInput.value : "";
+  const trimmedContent = typeof rawContent === "string" ? rawContent.trim() : "";
+  const rawTitle = titleInput ? titleInput.value : "";
+  const trimmedTitle = typeof rawTitle === "string" ? rawTitle.trim() : "";
+
+  // 1. Validation: content is required and cannot be whitespace-only
+  if (trimmedContent.length === 0) {
+    showStatus("Note content cannot be empty.", "error", statusEl);
+    if (contentInput && typeof contentInput.focus === "function") {
+      contentInput.focus();
+    }
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      if (typeof saveBtn.removeAttribute === "function") {
+        saveBtn.removeAttribute("aria-busy");
+      }
+    }
+    return null;
+  }
+
+  if (trimmedContent.length > 50_000) {
+    showStatus("Content exceeds maximum length of 50,000 characters.", "error", statusEl);
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      if (typeof saveBtn.removeAttribute === "function") {
+        saveBtn.removeAttribute("aria-busy");
+      }
+    }
+    return null;
+  }
+
+  if (trimmedTitle.length > 1_000) {
+    showStatus("Title exceeds maximum length of 1,000 characters.", "error", statusEl);
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      if (typeof saveBtn.removeAttribute === "function") {
+        saveBtn.removeAttribute("aria-busy");
+      }
+    }
+    return null;
+  }
+
+  // 2. Persist to storage via createMemory
+  let memory = null;
+  try {
+    memory = await createMemoryFn({
+      type: "manual",
+      content: trimmedContent,
+      title: trimmedTitle,
+    });
+  } catch (error) {
+    console.error("MEMOIR: Failed to save manual note:", error?.message || error);
+    showStatus(`Failed to save: ${error?.message || "Storage write error"}`, "error", statusEl);
+    // Keep composer open and preserve user input on failure
+    return null;
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      if (typeof saveBtn.removeAttribute === "function") {
+        saveBtn.removeAttribute("aria-busy");
+      }
+    }
+  }
+
+  // On confirmed storage success, close composer, clear inputs, and restore focus
+  closeNoteComposer({ composerEl, toggleBtn, titleInput, contentInput, restoreFocus });
+
+  // 3. Refresh list (persistence already succeeded)
+  try {
+    const refreshResult = await loadMemoriesFn(targetList, searchInput, doc);
+    if (refreshResult === false) {
+      showStatus("Note saved, but failed to refresh list.", "notice", statusEl);
+    } else {
+      showStatus("Note saved to MEMOIR.", "success", statusEl);
+    }
+  } catch (refreshError) {
+    console.error("MEMOIR: Note saved but list refresh failed:", refreshError?.message || refreshError);
+    showStatus("Note saved, but failed to refresh list.", "notice", statusEl);
+  }
+
+  return memory;
+}
+
+if (newNoteButton) {
+  newNoteButton.addEventListener("click", () => {
+    toggleNoteComposer();
+  });
+}
+
+if (cancelNoteButton) {
+  cancelNoteButton.addEventListener("click", () => {
+    closeNoteComposer({ restoreFocus: true });
+  });
+}
+
+if (saveNoteButton) {
+  saveNoteButton.addEventListener("click", () => {
+    handleSaveManualNote();
   });
 }
 
@@ -507,6 +728,7 @@ export async function loadMemories(
       doc,
       ...options,
     });
+    return true;
   } catch (error) {
     console.error("MEMOIR: Failed to load memories:", error.message);
 
@@ -518,6 +740,7 @@ export async function loadMemories(
         targetList.appendChild(errorMsg);
       }
     }
+    return false;
   }
 }
 

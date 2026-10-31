@@ -27,7 +27,28 @@
           <span class="btn-icon" aria-hidden="true">✦</span>
           <span>Save Something</span>
         </button>
+        <button id="newNoteButton" type="button" class="btn-secondary" aria-expanded="false" aria-controls="noteComposer">
+          <span class="btn-icon" aria-hidden="true">✎</span>
+          <span>New Note</span>
+        </button>
       </div>
+
+      <!-- Expandable Note Composer -->
+      <div id="noteComposer" class="note-composer hidden" role="region" aria-label="New Note Composer">
+        <div class="composer-field">
+          <label for="noteTitle" class="composer-label">Title <span class="label-optional">(optional)</span></label>
+          <input id="noteTitle" type="text" class="composer-input" placeholder="Title your note…" autocomplete="off" maxlength="1000">
+        </div>
+        <div class="composer-field">
+          <label for="noteContent" class="composer-label">Note <span class="label-required" aria-hidden="true">*</span></label>
+          <textarea id="noteContent" class="composer-textarea" rows="3" placeholder="What would you like to remember?" maxlength="50000" required></textarea>
+        </div>
+        <div class="composer-actions">
+          <button id="saveNoteButton" type="button" class="btn-primary btn-sm">Save Note</button>
+          <button id="cancelNoteButton" type="button" class="btn-secondary btn-sm">Cancel</button>
+        </div>
+      </div>
+
       <div id="statusMessage" class="status-banner visually-hidden" role="status" aria-live="polite"></div>
       <div class="capture-hint">
         <span class="hint-dot" aria-hidden="true"></span>
